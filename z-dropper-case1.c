@@ -15,13 +15,13 @@ static inline int memfd_create(const char *name, unsigned int flags) {
     return syscall(__NR_memfd_create, name, flags);
 }
 
-extern char **environ;
+//extern char **environ;
 
 int main(int argc, char* argv[]) {
     int s, fd;
     struct sockaddr_in addr;
     char buf[1024] = {0};
-    char *args[2]= {getenv("Z_PROC_NAME"), NULL};
+    char *args[2]= {"random-name", NULL};
     int count;
 
     if(argc < 2) exit(1);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     if ((s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) exit(1);
     if (connect(s, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) < 0) exit(1);
 
-    if ((fd = memfd_create(getenv("Z_PROC_NAME"), MFD_CLOEXEC)) < 0) exit(1);
+    if ((fd = memfd_create("random-name", MFD_CLOEXEC)) < 0) exit(1);
 
     while (1) {
       count = read(s, buf, sizeof(buf));
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     }
     close(s);
 
-    if (fexecve(fd, args, environ) < 0) exit(1);
+    if (fexecve(fd, args, NULL) < 0) exit(1);
 
     return 0;
 }

