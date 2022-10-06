@@ -8,7 +8,6 @@ fn main() !void {
     var buf: [1024]u8 = undefined;
     const args = [2]?[*:0]const u8{ "random_name", null };
 
-    //const res = linux.connect(socket, linux.SOCK.STREAM, 0);
     const localhost = try net.Address.parseIp("127.0.0.1", 4443);
     const socket = try net.tcpConnectToAddress(localhost);
     defer socket.close();
