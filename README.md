@@ -52,6 +52,9 @@ echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /de
 Preparing Zig version:
 
 ```
+# Getting source file:
+wget https://raw.githubusercontent.com/mzet-/z-dropper/main/z-dropper-case1.zig
+
 # Compilation and base64 encoding:
 EXE=z-dropper-case1; zig build-exe -OReleaseSmall --strip ${EXE}.zig; echo; cat "$EXE" | base64 -w 0; echo; echo
 
