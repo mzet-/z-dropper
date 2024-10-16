@@ -21,12 +21,12 @@ fn main() !void {
     while (true) {
         const count = try socket.reader().read(&buf);
         //_ = linux.syscall3(.write, fd, @ptrToInt(&buf[0]), count);
-        _ = linux.write(@intCast(i32, fd), &buf, count);
+        _ = linux.write(@intCast(fd), &buf, count);
         if (count <= 0 or count < buf.len)
             break;
     }
 
-    const res = linux.syscall5(.execveat, fd, @ptrToInt(""), @ptrToInt(&args[0]), 0, linux.AT.EMPTY_PATH);
+    const res = linux.syscall5(.execveat, fd, @intFromPtr(""), @intFromPtr(&args[0]), 0, linux.AT.EMPTY_PATH);
     if (res == -1) {
         try stdout.print("execveat: {d}!\n", .{linux.getErrno(fd)});
         return error.ExecveatFailed;
